@@ -1,0 +1,36 @@
+pipeline {
+    agent any
+    tools{
+        maven 'maven'
+    }
+
+    stages {
+        stage('git checkout') {
+            steps {
+                git branch: 'main' , url:'https://github.com/gowdasagar06/hello-world-mvn-java.git'
+            }
+        }
+        stage('build') {
+            steps {
+              
+                        sh 'mvn clean package'
+            
+            }
+        }
+        stage('build image'){
+            steps{
+                sh '''cd /var/lib/jenkins/workspace/hello-world-mvn-java/target
+                      sudo docker build -t java_app -f ../Dockerfile .
+                '''
+            }
+        }
+        stage('deploy'){
+            steps{
+                script {
+                    sh 'sudo docker rm -f tomcat'
+                    sh 'sudo docker run -d --name tomcat -p 8082:8080 java_app'
+                }
+            }    
+        }
+    }
+}
