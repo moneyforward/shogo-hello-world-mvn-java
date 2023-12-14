@@ -1,0 +1,51 @@
+pipeline {
+    agent any
+    tools{
+        maven 'maven'
+    }
+
+    stages {
+        stage('git checkout') {
+            agent{
+                label 'master'
+            }
+            steps {
+                git branch: 'master' , url:'https://github.com/gowdasagar06/hello-world-mvn-java.git'  
+            }
+        }
+        stage('build') {
+            agent{
+                label 'master'
+            }
+            steps {
+              
+                        sh 'mvn clean package'
+            
+            }
+        }
+    stage("archive-artifact"){
+        steps{
+            /*archiveArtifacts artifacts: 'target/*.war'*/
+            sh 'echo $WORKSPACE'
+        }
+    }
+    stage("stash"){
+        agent{
+                label 'master'
+            }
+        steps{
+            stash(name: 'war_file', includes: '**/*.war')
+        }
+    }
+    stage("unstash"){
+        agent{
+                label 'ansible'
+            }
+        steps{
+            unstash("war_file")
+            sh "cp -R /home/ubuntu/jenkins/workspace/jenkins-ansible/target/*.war /home/ubuntu/ansible-in-ubuntu-tomcat/tomcat/templates/"
+            sh"ansible-playbook -i /home/ubuntu/ansible-in-ubuntu-tomcat/inventory.ini /home/ubuntu/ansible-in-ubuntu-tomcat/tomcat.yml "
+        }
+    }
+}
+}
