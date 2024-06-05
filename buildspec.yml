@@ -1,9 +1,11 @@
 version: 0.2
 phases:
   install:
-    runtime-versions:
-      java: corretto17
+    #runtime-versions:
+     #java: corretto17
     commands:
+      - echo "installing java"
+      - sudo yum install -y java-17-amazon-corretto-17.0.11+9-1.amzn2023.1.x86_64
       - echo Installing SonarQube Scanner...
       - curl -o sonar-scanner-cli.zip -L https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
       - unzip sonar-scanner-cli.zip -d /opt
